@@ -14,7 +14,7 @@ func DiagnosticHandler(w http.ResponseWriter, r *http.Request) {
 	output += fmt.Sprintf("\"languageapi\": \"%s\",\n", http.StatusText(http.StatusBadGateway))
 	output += fmt.Sprintf("\"countriesapi\": \"%s\",\n", http.StatusText(http.StatusBadGateway))
 	output += fmt.Sprintf("\"version\": \"%s\",\n", "v1.0.0")
-	output += fmt.Sprintf("\"uptime\": \"%f\",\n", time.Since(StartTime).Seconds())
+	output += fmt.Sprintf("\"uptime\": \"%f\"\n", time.Since(StartTime).Seconds())
 	output += "}"
 
 	_, err := fmt.Fprintf(w, "%v", output)
