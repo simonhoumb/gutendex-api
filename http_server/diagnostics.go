@@ -14,7 +14,7 @@ func DiagnosticHandler(w http.ResponseWriter, r *http.Request) {
 		Languageapi:  http.StatusText(http.StatusBadGateway),
 		Countriesapi: http.StatusText(http.StatusBadGateway),
 		Version:      "v1.0.0",
-		Uptime:       time.Since(StartTime)}
+		Uptime:       time.Since(StartTime).Seconds()}
 
 	encoder := json.NewEncoder(w)
 	err := encoder.Encode(statusOutput)
