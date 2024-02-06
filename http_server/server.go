@@ -19,6 +19,7 @@ func Start() {
 
 	http.HandleFunc(STATUS_PATH, StatusHandler)
 	http.HandleFunc(READERSHIP_PATH, ReadershipHandler)
+	http.HandleFunc(BOOKCOUNT_PATH, BookCountHandler)
 
 	log.Println("Starting HTTP Server on port " + port + "...")
 	StartTime = time.Now()
