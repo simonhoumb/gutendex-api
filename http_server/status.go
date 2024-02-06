@@ -1,7 +1,6 @@
 package http_server
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 	"time"
@@ -28,12 +27,7 @@ func StatusHandler(w http.ResponseWriter, r *http.Request) {
 			Version:      VERSION,
 			Uptime:       time.Since(StartTime).Seconds()}
 
-		encoder := json.NewEncoder(w)
-		err := encoder.Encode(statusOutput)
-		if err != nil {
-			log.Println("Error during JSON encoding: ", err.Error())
-			http.Error(w, "Error during JSON encoding.", http.StatusInternalServerError)
-		}
+		encodeJSON(w, statusOutput)
 
 	}
 }
