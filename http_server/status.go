@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+var client = &http.Client{Timeout: 3 * time.Second}
+
 type Status struct {
 	GutendexAPI  int     `json:"gutendexapi"`
 	LanguageAPI  int     `json:"languageapi"`
@@ -14,8 +16,6 @@ type Status struct {
 	Version      string  `json:"version"`
 	Uptime       float64 `json:"uptime"`
 }
-
-var client = &http.Client{Timeout: 3 * time.Second}
 
 func StatusHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
