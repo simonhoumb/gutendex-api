@@ -18,7 +18,7 @@ func Start() {
 
 	http.HandleFunc(STATUS_PATH, DiagnosticHandler)
 
-	log.Println("Starting http_server on port " + port + "...")
+	log.Println("Starting HTTP Server on port " + port + "...")
 	StartTime = time.Now()
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
