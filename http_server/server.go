@@ -16,7 +16,7 @@ func Start() {
 		port = "8080"
 	}
 
-	http.HandleFunc(STATUS_PATH, DiagnosticHandler)
+	http.HandleFunc(STATUS_PATH, StatusHandler)
 
 	log.Println("Starting HTTP Server on port " + port + "...")
 	StartTime = time.Now()
