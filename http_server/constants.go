@@ -4,7 +4,7 @@ const VERSION = "v1"
 
 // http url paths
 const EMPTY_PATH = "/"
-const DEFAULT_PATH = "/librarystats/" + VERSION + "/"
+const ROOT_PATH = "/librarystats/" + VERSION + "/"
 const BOOKCOUNT_PATH = "/librarystats/" + VERSION + "/bookcount/"
 const READERSHIP_PATH = "/librarystats/" + VERSION + "/readership/"
 const STATUS_PATH = "/librarystats/" + VERSION + "/status/"
