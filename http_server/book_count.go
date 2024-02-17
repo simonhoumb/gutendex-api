@@ -19,14 +19,14 @@ type BookCount struct {
 func BookCountHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		handleGetRequest(w, r)
+		bookCountGetRequest(w, r)
 	default:
 		http.Error(w, fmt.Sprintf("The method %s is not implemented. Currently only %s is supported.",
 			r.Method, http.MethodGet), http.StatusMethodNotAllowed)
 	}
 }
 
-func handleGetRequest(w http.ResponseWriter, r *http.Request) {
+func bookCountGetRequest(w http.ResponseWriter, r *http.Request) {
 	defer httpClient.CloseIdleConnections()
 	w.Header().Add("Content-Type", "application/json")
 
@@ -38,10 +38,11 @@ func handleGetRequest(w http.ResponseWriter, r *http.Request) {
 
 	for _, code := range languageCodes {
 
+		//refactor this into a function to get a result for one country (maybe move to gutendex.go)
 		res := utils.GetResults(w, httpClient, GUTENDEXAPI_URL+"?languages="+code)
 
 		var books gutendex.Books
-		decodeJSON(w, res, &books)
+		utils.DecodeJSON(w, res, &books)
 
 		bookCountOutput = append(bookCountOutput, BookCount{
 			Language: code,
@@ -50,7 +51,7 @@ func handleGetRequest(w http.ResponseWriter, r *http.Request) {
 			Fraction: float64(books.Count) / float64(totalBookCount(w)),
 		})
 	}
-	encodeJSON(w, &bookCountOutput)
+	utils.EncodeJSON(w, &bookCountOutput)
 }
 
 func isValidLanguageCode(code string) bool {
@@ -65,7 +66,7 @@ func isValidLanguageCode(code string) bool {
 func totalBookCount(w http.ResponseWriter) int {
 	res := utils.GetResults(w, httpClient, GUTENDEXAPI_URL)
 	var books gutendex.Books
-	decodeJSON(w, res, &books)
+	utils.DecodeJSON(w, res, &books)
 
 	return books.Count
 }

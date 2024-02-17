@@ -1,6 +1,7 @@
 package http_server
 
 import (
+	"assignment-1/utils"
 	"log"
 	"net/http"
 	"time"
@@ -25,7 +26,7 @@ func StatusHandler(w http.ResponseWriter, r *http.Request) {
 			Version:      VERSION,
 			Uptime:       time.Since(startTime).Seconds()}
 
-		encodeJSON(w, &statusOutput)
+		utils.EncodeJSON(w, &statusOutput)
 
 	}
 }

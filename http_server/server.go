@@ -1,7 +1,6 @@
 package http_server
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 	"os"
@@ -27,20 +26,4 @@ func Start() {
 	log.Println("Starting HTTP Server on port " + port + "...")
 	startTime = time.Now()
 	log.Fatal(http.ListenAndServe(":"+port, nil))
-}
-
-func encodeJSON[T any](w http.ResponseWriter, v *T) {
-	encoder := json.NewEncoder(w)
-	if err := encoder.Encode(&v); err != nil {
-		http.Error(w, "Error while encoding to json.", http.StatusInternalServerError)
-		log.Println("Error while encoding to json: ", err.Error())
-	}
-}
-
-func decodeJSON[T any](w http.ResponseWriter, res *http.Response, v *T) {
-	decoder := json.NewDecoder(res.Body)
-	if err := decoder.Decode(&v); err != nil {
-		http.Error(w, "Error while decoding json: ", http.StatusInternalServerError)
-		log.Println("Error while decoding json: ", err.Error())
-	}
 }
