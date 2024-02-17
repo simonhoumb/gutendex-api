@@ -62,6 +62,8 @@ func readershipGetRequest(w http.ResponseWriter, r *http.Request) {
 	var readershipOutput []Readership
 	if languageParameter != "" && len(languageParameter) == 2 {
 		for i := 0; i < countriesToShow; i++ {
+
+			//maybe refactor this
 			bookRes := utils.GetResults(w, httpClient,
 				GUTENDEXAPI_URL+"?languages="+countries[i].Iso31661Alpha2)
 
