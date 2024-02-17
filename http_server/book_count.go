@@ -47,7 +47,7 @@ func handleGetRequest(w http.ResponseWriter, r *http.Request) {
 			Language: code,
 			Books:    books.Count,
 			Authors:  numberOfAuthors(books),
-			Fraction: float64(books.Count) / float64(totalBookCount(w, r)),
+			Fraction: float64(books.Count) / float64(totalBookCount(w)),
 		})
 	}
 	encodeJSON(w, &bookCountOutput)
@@ -62,7 +62,7 @@ func isValidLanguageCode(code string) bool {
 	return len(code) == 2
 }
 
-func totalBookCount(w http.ResponseWriter, r *http.Request) int {
+func totalBookCount(w http.ResponseWriter) int {
 	res := utils.GetResults(w, httpClient, GUTENDEXAPI_URL)
 	var books gutendex.Books
 	decodeJSON(w, res, &books)
