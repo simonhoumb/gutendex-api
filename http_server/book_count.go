@@ -40,13 +40,15 @@ func handleGetRequest(w http.ResponseWriter, r *http.Request) {
 	for _, code := range languageCodes {
 		res, err := httpClient.Get(GUTENDEXAPI_URL + "?languages=" + code)
 		if err != nil {
-			log.Println("Error while getting response:", err.Error())
+			http.Error(w, "Error from response.", http.StatusInternalServerError)
+			log.Println("Error from response:", err.Error())
 		}
 
 		decoder := json.NewDecoder(res.Body)
 		var books gutendex.Books
 		if err := decoder.Decode(&books); err != nil {
-			log.Println("Error while decoding from json: ", err.Error())
+			http.Error(w, "Error while decoding json: ", http.StatusInternalServerError)
+			log.Println("Error while decoding json: ", err.Error())
 		}
 
 		bookCountOutput = append(bookCountOutput, BookCount{
@@ -58,6 +60,7 @@ func handleGetRequest(w http.ResponseWriter, r *http.Request) {
 	}
 	encoder := json.NewEncoder(w)
 	if err := encoder.Encode(&bookCountOutput); err != nil {
+		http.Error(w, "Error while encoding to json.", http.StatusInternalServerError)
 		log.Println("Error while encoding to json: ", err.Error())
 	}
 }
@@ -84,13 +87,15 @@ func invalidLanguageCodeError(w http.ResponseWriter) {
 func totalBookCount(w http.ResponseWriter, r *http.Request) int {
 	res, err := httpClient.Get(GUTENDEXAPI_URL)
 	if err != nil {
+		http.Error(w, "Error while getting response.", http.StatusInternalServerError)
 		log.Println("Error while getting response:", err.Error())
 	}
 
 	decoder := json.NewDecoder(res.Body)
 	var books gutendex.Books
 	if err := decoder.Decode(&books); err != nil {
-		log.Fatal(err)
+		http.Error(w, "Error while decoding to json.", http.StatusInternalServerError)
+		log.Println("Error while decoding to json: ", err.Error())
 	}
 	return books.Count
 }
