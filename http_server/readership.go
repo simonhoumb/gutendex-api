@@ -1,7 +1,10 @@
 package http_server
 
 import (
+	"assignment-1/api/language2countries"
+	"assignment-1/utils"
 	"log"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -22,35 +25,45 @@ func ReadershipHandler(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path
 		parts := strings.Split(path, "/")
 
-		var languageCode string
+		var languageParameter string
+		var countriesToShow int
 
 		if len(parts) >= 5 {
-			languageCode = parts[4]
+			languageParameter = parts[4]
 		}
 
-		limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
-		if err != nil {
-			log.Println("Value of parameter 'limit' is not valid: ", err.Error())
+		res := utils.GetResults(w, httpClient, LANGUAGEAPI_URL+languageParameter)
+		var countries []language2countries.Country
+		decodeJSON(w, res, &countries)
+
+		limit := r.URL.Query().Get("limit")
+		if limit != "" {
+			limit, err := strconv.Atoi(limit)
+			if err != nil {
+				http.Error(w, "Error when converting parameter.", http.StatusInternalServerError)
+				log.Println("Error when converting parameter: ", err.Error())
+			}
+			countriesToShow = int(math.Min(float64(len(countries)), float64(limit)))
+		} else {
+			countriesToShow = len(countries)
 		}
 
-		if limit == 0 {
-			limit = 1
-		}
-
-		if languageCode != "" && len(languageCode) == 2 {
-			for i := 0; i < limit; i++ {
-				readershipOutput := Readership{
-					Country:    "Norway",
-					IsoCode:    languageCode,
+		var readershipOutput []Readership
+		if languageParameter != "" && len(languageParameter) == 2 {
+			for i := 0; i < countriesToShow; i++ {
+				readershipOutput = append(readershipOutput, Readership{
+					Country:    countries[i].OfficialName,
+					IsoCode:    countries[i].Iso31661Alpha2,
 					Books:      211,
 					Authors:    14,
-					Readership: 5400000 / 211}
+					Readership: 5400000 / 211})
 
-				encodeJSON(w, readershipOutput)
 			}
 		} else {
 			http.Error(w, "No language code provided.", http.StatusBadRequest)
 		}
+
+		encodeJSON(w, &readershipOutput)
 
 	}
 }
