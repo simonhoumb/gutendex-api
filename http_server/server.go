@@ -2,14 +2,13 @@ package http_server
 
 import (
 	"encoding/json"
-	"io"
 	"log"
 	"net/http"
 	"os"
 	"time"
 )
 
-var StartTime time.Time
+var startTime time.Time
 var httpClient = &http.Client{Timeout: 3 * time.Second}
 
 func Start() {
@@ -26,25 +25,22 @@ func Start() {
 	http.HandleFunc(BOOKCOUNT_PATH, BookCountHandler)
 
 	log.Println("Starting HTTP Server on port " + port + "...")
-	StartTime = time.Now()
+	startTime = time.Now()
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
-func encodeJSON(w http.ResponseWriter, v any) {
+func encodeJSON[T any](w http.ResponseWriter, v *T) {
 	encoder := json.NewEncoder(w)
-	err := encoder.Encode(v)
-	if err != nil {
-		log.Println("Error during JSON encoding: ", err.Error())
-		http.Error(w, "Error during JSON encoding.", http.StatusInternalServerError)
+	if err := encoder.Encode(&v); err != nil {
+		http.Error(w, "Error while encoding to json.", http.StatusInternalServerError)
+		log.Println("Error while encoding to json: ", err.Error())
 	}
 }
 
-func decodeJSON(w http.ResponseWriter, res *http.Response, v any) {
+func decodeJSON[T any](w http.ResponseWriter, res *http.Response, v *T) {
 	decoder := json.NewDecoder(res.Body)
-	if err := decoder.Decode(&v); err == io.EOF {
-		return
-	} else if err != nil {
-		log.Println("Error during JSON decoding: ", err.Error())
-		http.Error(w, "Error during JSON decoding.", http.StatusInternalServerError)
+	if err := decoder.Decode(&v); err != nil {
+		http.Error(w, "Error while decoding json: ", http.StatusInternalServerError)
+		log.Println("Error while decoding json: ", err.Error())
 	}
 }

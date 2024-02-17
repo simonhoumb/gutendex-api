@@ -23,9 +23,9 @@ func StatusHandler(w http.ResponseWriter, r *http.Request) {
 			LanguageAPI:  getStatusCode(LANGUAGEAPI_URL),
 			CountriesAPI: getStatusCode(COUNTRIESAPI_URL),
 			Version:      VERSION,
-			Uptime:       time.Since(StartTime).Seconds()}
+			Uptime:       time.Since(startTime).Seconds()}
 
-		encodeJSON(w, statusOutput)
+		encodeJSON(w, &statusOutput)
 
 	}
 }

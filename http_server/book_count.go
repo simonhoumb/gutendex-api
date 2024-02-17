@@ -2,9 +2,8 @@ package http_server
 
 import (
 	"assignment-1/api/gutendex"
-	"encoding/json"
+	"assignment-1/utils"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 	"unicode"
@@ -38,18 +37,11 @@ func handleGetRequest(w http.ResponseWriter, r *http.Request) {
 	languageCodes := strings.Split(languageParameter, ",")
 
 	for _, code := range languageCodes {
-		res, err := httpClient.Get(GUTENDEXAPI_URL + "?languages=" + code)
-		if err != nil {
-			http.Error(w, "Error from response.", http.StatusInternalServerError)
-			log.Println("Error from response:", err.Error())
-		}
 
-		decoder := json.NewDecoder(res.Body)
+		res := utils.GetResults(w, httpClient, GUTENDEXAPI_URL+"?languages="+code)
+
 		var books gutendex.Books
-		if err := decoder.Decode(&books); err != nil {
-			http.Error(w, "Error while decoding json: ", http.StatusInternalServerError)
-			log.Println("Error while decoding json: ", err.Error())
-		}
+		decodeJSON(w, res, &books)
 
 		bookCountOutput = append(bookCountOutput, BookCount{
 			Language: code,
@@ -58,17 +50,7 @@ func handleGetRequest(w http.ResponseWriter, r *http.Request) {
 			Fraction: float64(books.Count) / float64(totalBookCount(w, r)),
 		})
 	}
-	encoder := json.NewEncoder(w)
-	if err := encoder.Encode(&bookCountOutput); err != nil {
-		http.Error(w, "Error while encoding to json.", http.StatusInternalServerError)
-		log.Println("Error while encoding to json: ", err.Error())
-	}
-}
-
-func getResults(query string) (*http.Response, error) {
-	fmt.Println("Url used: " + GUTENDEXAPI_URL + query)
-	result, err := httpClient.Get(GUTENDEXAPI_URL + query)
-	return result, err
+	encodeJSON(w, &bookCountOutput)
 }
 
 func isValidLanguageCode(code string) bool {
@@ -80,23 +62,11 @@ func isValidLanguageCode(code string) bool {
 	return len(code) == 2
 }
 
-func invalidLanguageCodeError(w http.ResponseWriter) {
-	http.Error(w, "No valid language code provided.", http.StatusBadRequest)
-}
-
 func totalBookCount(w http.ResponseWriter, r *http.Request) int {
-	res, err := httpClient.Get(GUTENDEXAPI_URL)
-	if err != nil {
-		http.Error(w, "Error while getting response.", http.StatusInternalServerError)
-		log.Println("Error while getting response:", err.Error())
-	}
-
-	decoder := json.NewDecoder(res.Body)
+	res := utils.GetResults(w, httpClient, GUTENDEXAPI_URL)
 	var books gutendex.Books
-	if err := decoder.Decode(&books); err != nil {
-		http.Error(w, "Error while decoding to json.", http.StatusInternalServerError)
-		log.Println("Error while decoding to json: ", err.Error())
-	}
+	decodeJSON(w, res, &books)
+
 	return books.Count
 }
 
