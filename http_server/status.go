@@ -6,8 +6,6 @@ import (
 	"time"
 )
 
-var client = &http.Client{Timeout: 3 * time.Second}
-
 type Status struct {
 	GutendexAPI  int     `json:"gutendexapi"`
 	LanguageAPI  int     `json:"languageapi"`
@@ -21,9 +19,9 @@ func StatusHandler(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/json")
 
 		statusOutput := Status{
-			GutendexAPI:  getStatusCode(w, GUTENDEXAPI_URL),
-			LanguageAPI:  getStatusCode(w, LANGUAGEAPI_URL),
-			CountriesAPI: getStatusCode(w, COUNTRIESAPI_URL),
+			GutendexAPI:  getStatusCode(GUTENDEXAPI_URL),
+			LanguageAPI:  getStatusCode(LANGUAGEAPI_URL),
+			CountriesAPI: getStatusCode(COUNTRIESAPI_URL),
 			Version:      VERSION,
 			Uptime:       time.Since(StartTime).Seconds()}
 
@@ -32,10 +30,8 @@ func StatusHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getStatusCode(w http.ResponseWriter, url string) int {
-	defer client.CloseIdleConnections()
-
-	res, err := client.Get(url)
+func getStatusCode(url string) int {
+	res, err := httpClient.Get(url)
 	if err != nil {
 		log.Println("Error when requesting remote endpoint: ", err.Error())
 		return http.StatusServiceUnavailable
