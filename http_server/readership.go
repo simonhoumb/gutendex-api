@@ -1,6 +1,7 @@
 package http_server
 
 import (
+	"assignment-1/api/gutendex"
 	"assignment-1/api/language2countries"
 	"assignment-1/utils"
 	"fmt"
@@ -61,12 +62,18 @@ func readershipGetRequest(w http.ResponseWriter, r *http.Request) {
 	var readershipOutput []Readership
 	if languageParameter != "" && len(languageParameter) == 2 {
 		for i := 0; i < countriesToShow; i++ {
+			bookRes := utils.GetResults(w, httpClient,
+				GUTENDEXAPI_URL+"?languages="+countries[i].Iso31661Alpha2)
+
+			var books gutendex.Books
+			utils.DecodeJSON(w, bookRes, &books)
+
 			readershipOutput = append(readershipOutput, Readership{
 				Country:    countries[i].OfficialName,
 				IsoCode:    countries[i].Iso31661Alpha2,
-				Books:      211,      //use same as inside for loop in book_count.go
-				Authors:    14,       //use same as inside for loop in book_count.go
-				Readership: 5400000}) //use rest countries api with isocode
+				Books:      books.Count,            //use same as inside for loop in book_count.go
+				Authors:    numberOfAuthors(books), //use same as inside for loop in book_count.go
+				Readership: 5400000})               //use rest countries api with isocode
 
 		}
 	} else {
