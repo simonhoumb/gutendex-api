@@ -34,33 +34,23 @@ func readershipGetRequest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 
 	path := r.URL.Path
-	parts := strings.Split(path, "/")
+	urlParts := strings.Split(path, "/")
 
 	var languageParameter string
-	var countriesToShow int
 
-	if len(parts) >= 5 {
-		languageParameter = parts[4]
+	if len(urlParts) >= 5 {
+		languageParameter = urlParts[4]
 	}
+	if validReadershipParameter(languageParameter) {
 
-	res := utils.GetResults(w, httpClient, LANGUAGEAPI_URL+languageParameter)
-	var countries []language2countries.Country
-	utils.DecodeJSON(w, res, &countries)
+		res := utils.GetResults(w, httpClient, LANGUAGEAPI_URL+languageParameter)
+		var countries []language2countries.Country
+		utils.DecodeJSON(w, res, &countries)
 
-	limit := r.URL.Query().Get("limit")
-	if limit != "" {
-		limit, err := strconv.Atoi(limit)
-		if err != nil {
-			http.Error(w, "Error when converting parameter.", http.StatusInternalServerError)
-			log.Println("Error when converting parameter: ", err.Error())
-		}
-		countriesToShow = int(math.Min(float64(len(countries)), float64(limit)))
-	} else {
-		countriesToShow = len(countries)
-	}
+		limit := r.URL.Query().Get("limit")
+		countriesToShow := determineCountriesToShow(w, limit, countries)
 
-	var readershipOutput []Readership
-	if languageParameter != "" && len(languageParameter) == 2 {
+		var readershipOutput []Readership
 		for i := 0; i < countriesToShow; i++ {
 
 			//maybe refactor this
@@ -78,9 +68,36 @@ func readershipGetRequest(w http.ResponseWriter, r *http.Request) {
 				Readership: 5400000})               //use rest countries api with isocode
 
 		}
+		utils.EncodeJSON(w, &readershipOutput)
 	} else {
-		http.Error(w, "No language code provided.", http.StatusBadRequest)
+		http.Error(w, "No valid language code provided.", http.StatusBadRequest)
+		log.Println("No valid language code provided")
+	}
+}
+
+func determineCountriesToShow(w http.ResponseWriter, limitParam string, countries []language2countries.Country) int {
+	limit, err := parseLimit(limitParam, countries)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return 0 // Or handle the error differently if needed
 	}
 
-	utils.EncodeJSON(w, &readershipOutput)
+	return int(math.Min(float64(len(countries)), float64(limit)))
+}
+
+func parseLimit(limitParam string, listOfCountries []language2countries.Country) (int, error) {
+	if limitParam == "" {
+		return len(listOfCountries), nil
+	}
+
+	limit, err := strconv.Atoi(limitParam)
+	if err != nil {
+		return 0, fmt.Errorf("error parsing limit parameter: %s", limitParam)
+	}
+
+	return limit, err
+}
+
+func validReadershipParameter(parameter string) bool {
+	return parameter != "" && len(parameter) == 2
 }
