@@ -43,6 +43,9 @@ func readershipGetRequest(w http.ResponseWriter, r *http.Request) {
 	}
 	if validReadershipParameter(languageParameter) {
 
+		//might need to add error return in GetResults so the rest of this function won't
+		//run if it cant reach the endpoint
+		//Maybe also check if res.body has content
 		res := utils.GetResults(w, httpClient, LANGUAGEAPI_URL+languageParameter)
 		var countries []language2countries.Country
 		utils.DecodeJSON(w, res, &countries)
@@ -63,9 +66,9 @@ func readershipGetRequest(w http.ResponseWriter, r *http.Request) {
 			readershipOutput = append(readershipOutput, Readership{
 				Country:    countries[i].OfficialName,
 				IsoCode:    countries[i].Iso31661Alpha2,
-				Books:      books.Count,            //use same as inside for loop in book_count.go
-				Authors:    numberOfAuthors(books), //use same as inside for loop in book_count.go
-				Readership: 5400000})               //use rest countries api with isocode
+				Books:      books.Count,                           //use same as inside for loop in book_count.go
+				Authors:    numberOfAuthors(w, httpClient, books), //use same as inside for loop in book_count.go
+				Readership: 5400000})                              //use rest countries api with isocode
 
 		}
 		utils.EncodeJSON(w, &readershipOutput)
