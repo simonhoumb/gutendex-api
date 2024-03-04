@@ -3,6 +3,7 @@ package http_server
 import (
 	"assignment-1/api/gutendex"
 	"assignment-1/api/language2countries"
+	"assignment-1/api/restcountries"
 	"assignment-1/utils"
 	"fmt"
 	"log"
@@ -59,17 +60,22 @@ func readershipGetRequest(w http.ResponseWriter, r *http.Request) {
 			//maybe refactor this
 			bookRes := utils.GetResults(w, httpClient,
 				GUTENDEXAPI_URL+"?languages="+countries[i].Iso31661Alpha2)
-
+			var bookResults []gutendex.Book
 			var books gutendex.Books
 			utils.DecodeJSON(w, bookRes, &books)
+
+			getAllPagesLoop(w, httpClient, &books, &bookResults)
+
+			restRes := utils.GetResults(w, httpClient, COUNTRIESAPI_URL+"/alpha/"+countries[i].Iso31661Alpha2)
+			var restCountries []restcountries.RestCountry
+			utils.DecodeJSON(w, restRes, &restCountries)
 
 			readershipOutput = append(readershipOutput, Readership{
 				Country:    countries[i].OfficialName,
 				IsoCode:    countries[i].Iso31661Alpha2,
-				Books:      books.Count,                           //use same as inside for loop in book_count.go
-				Authors:    numberOfAuthors(w, httpClient, books), //use same as inside for loop in book_count.go
-				Readership: 5400000})                              //use rest countries api with isocode
-
+				Books:      books.Count,                                 //use same as inside for loop in book_count.go
+				Authors:    numberOfAuthors(w, httpClient, bookResults), //use same as inside for loop in book_count.go
+				Readership: restCountries[0].Population})
 		}
 		utils.EncodeJSON(w, &readershipOutput)
 	} else {
