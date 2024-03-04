@@ -12,7 +12,7 @@ URL Path: bookcount/?language={:two_letter_language_code+}/
 
 ### Response
 - Content type: ```application/json```
-- Status code: 200 if everything is OK, appropriate error code otherwise. Ensure to deal with errors gracefully.
+- Status code: 200 if everything is OK, appropriate error code otherwise.
 #### Body: example url (bookcount/?language=fi,no/) 
 ```
 [
@@ -42,7 +42,7 @@ Path: readership/{:two_letter_language_code}{?limit={:number}}
 
 ### Response
 - Content type: application/json
-- Status code: 200 if everything is OK, appropriate error code otherwise. Ensure to deal with errors gracefully.
+- Status code: 200 if everything is OK, appropriate error code otherwise.
 
 #### Body: example url (readership/no/?limit=2/)
 ```
