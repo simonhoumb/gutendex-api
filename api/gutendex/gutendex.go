@@ -1,10 +1,10 @@
 package gutendex
 
 type Books struct {
-	Count    int    `json:"count"`
-	Next     string `json:"next"`
-	Previous string `json:"previous"`
-	Results  []Book `json:"results"`
+	Count    int     `json:"count"`
+	Next     *string `json:"next"`
+	Previous string  `json:"previous"`
+	Results  []Book  `json:"results"`
 }
 
 type Book struct {

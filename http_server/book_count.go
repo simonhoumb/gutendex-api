@@ -5,7 +5,6 @@ import (
 	"assignment-1/utils"
 	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 	"unicode"
 )
@@ -45,14 +44,12 @@ func bookCountGetRequest(w http.ResponseWriter, r *http.Request) {
 		var books gutendex.Books
 		utils.DecodeJSON(w, res, &books)
 
-		if books.Next != "" {
-			getAllPages(w, httpClient, books, bookResults)
-		}
+		getAllPagesLoop(w, httpClient, &books, &bookResults)
 
 		bookCountOutput = append(bookCountOutput, BookCount{
 			Language: code,
 			Books:    books.Count,
-			Authors:  numberOfAuthors(w, httpClient, books),
+			Authors:  numberOfAuthors(w, httpClient, bookResults),
 			Fraction: float64(books.Count) / float64(totalBookCount(w)),
 		})
 	}
@@ -76,46 +73,68 @@ func totalBookCount(w http.ResponseWriter) int {
 	return books.Count
 }
 
-func getAllPages(w http.ResponseWriter, client *http.Client, books gutendex.Books) {
+func getAllPagesLoop(w http.ResponseWriter, client *http.Client, books *gutendex.Books, bookResults *[]gutendex.Book) {
+	fmt.Println("entered GetAllPages....")
+	*bookResults = append(*bookResults, books.Results...)
 
+	pageNum := 1
+	for books.Next != nil {
+		pageNum++
+		fmt.Printf("Entered page: %d\n", pageNum)
+		res := utils.GetResults(w, client, *books.Next)
+		utils.DecodeJSON(w, res, &books)
+		*bookResults = append(*bookResults, books.Results...)
+	}
+	return
 }
 
-func numberOfAuthors(w http.ResponseWriter, client *http.Client, books gutendex.Books) int {
+func getAllPages(w http.ResponseWriter, client *http.Client, books *gutendex.Books, bookResults *[]gutendex.Book) {
+	fmt.Println("entered GetAllPages....")
+	*bookResults = append(*bookResults, books.Results...)
+
+	if books.Next != nil {
+		res := utils.GetResults(w, client, *books.Next)
+		utils.DecodeJSON(w, res, &books)
+		getAllPages(w, client, books, bookResults)
+	}
+	return
+}
+
+func numberOfAuthors(w http.ResponseWriter, client *http.Client, bookResults []gutendex.Book) int {
 	uniqueAuthors := make(map[string]bool)
 	var authorList []string
 
+	for _, book := range bookResults {
+		for _, author := range book.Authors {
+			if _, found := uniqueAuthors[author.Name]; !found && author.Name != "" {
+				uniqueAuthors[author.Name] = true
+				authorList = append(authorList, author.Name)
+			}
+		}
+	}
 	/*
-		for _, book := range books.Results {
-			for _, author := range book.Authors {
-				if _, found := uniqueAuthors[author.Name]; !found && author.Name != "" {
-					uniqueAuthors[author.Name] = true
-					authorList = append(authorList, author.Name)
+		hasNext := true
+		pageNum := 1
+		for hasNext {
+			for _, book := range books.Results {
+				for _, author := range book.Authors {
+					if _, found := uniqueAuthors[author.Name]; !found && author.Name != "" {
+						uniqueAuthors[author.Name] = true
+						authorList = append(authorList, author.Name)
+					}
 				}
+			}
+			fmt.Println("page: " + strconv.Itoa(pageNum))
+			fmt.Println("next: " + books.Next)
+			if books.Next != "" {
+				res := utils.GetResults(w, client, books.Next)
+				utils.DecodeJSON(w, res, &books)
+				pageNum++
+
+			} else {
+				hasNext = false
 			}
 		}
 	*/
-
-	hasNext := true
-	pageNum := 1
-	for hasNext {
-		for _, book := range books.Results {
-			for _, author := range book.Authors {
-				if _, found := uniqueAuthors[author.Name]; !found && author.Name != "" {
-					uniqueAuthors[author.Name] = true
-					authorList = append(authorList, author.Name)
-				}
-			}
-		}
-		fmt.Println("page: " + strconv.Itoa(pageNum))
-		fmt.Println("next: " + books.Next)
-		if books.Next != "" {
-			res := utils.GetResults(w, client, books.Next)
-			utils.DecodeJSON(w, res, &books)
-			pageNum++
-
-		} else {
-			hasNext = false
-		}
-	}
 	return len(uniqueAuthors)
 }
