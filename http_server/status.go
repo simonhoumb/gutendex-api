@@ -22,7 +22,7 @@ func StatusHandler(w http.ResponseWriter, r *http.Request) {
 		statusOutput := Status{
 			GutendexAPI:  getStatusCode(GUTENDEXAPI_URL),
 			LanguageAPI:  getStatusCode(LANGUAGEAPI_URL),
-			CountriesAPI: getStatusCode(COUNTRIESAPI_URL),
+			CountriesAPI: getStatusCode(COUNTRIESAPI_URL + "/all"),
 			Version:      VERSION,
 			Uptime:       time.Since(startTime).Seconds()}
 
