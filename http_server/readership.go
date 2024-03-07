@@ -44,9 +44,6 @@ func readershipGetRequest(w http.ResponseWriter, r *http.Request) {
 	}
 	if validReadershipParameter(languageParameter) {
 
-		//might need to add error return in GetResults so the rest of this function won't
-		//run if it cant reach the endpoint
-		//Maybe also check if res.body has content
 		res := utils.GetResults(w, httpClient, LANGUAGEAPI_URL+languageParameter)
 		var countries []language2countries.Country
 		utils.DecodeJSON(w, res, &countries)
