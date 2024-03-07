@@ -12,12 +12,9 @@ func RootHandler(w http.ResponseWriter, r *http.Request) {
 
 		output := fmt.Sprintf(`
 Welcome to librarystats! <br>
-<a href="%s">To Book Count</a> 
-<input type="text" id="bookCountText" name="bookCountText"> <br>
-<a href="%s">To Readership</a> 
-<input type="text" id="readershipLanguage" name="readershipLanguage"> 
-<input type="text" id="readershipLimit" name="readershipLimit"> <br>
-<a href="%s">To Status</a>`,
+<a href="%s">To Book Count</a> <br>
+<a href="%s">To Readership</a> <br>
+<a href="%s">To Status</a> <br>`,
 			BOOKCOUNT_PATH, READERSHIP_PATH, STATUS_PATH)
 
 		_, err := fmt.Fprintf(w, "%v", output)
