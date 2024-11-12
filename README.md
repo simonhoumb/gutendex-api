@@ -1,4 +1,4 @@
-# assignment-1 
+# gutendex-api
 
 This project is a part of assignment 1 from PROG2005 Cloud Technologies, NTNU.
 The goal of the assignment is to develop a REST web application that provides data about books in a given language on 
